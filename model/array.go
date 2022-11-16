@@ -30,3 +30,13 @@ func (n *Node) Each(cb func(idx int, value *Node) error) error {
 	}
 	return nil
 }
+
+// RemoveIndex from array
+func (n *Node) RemoveIndex(idx int) error {
+	arrlen := len(n.arrayValue)
+	if idx >= arrlen {
+		return fmt.Errorf("index %d out of range (len=%d)", idx, arrlen)
+	}
+	n.arrayValue = append(n.arrayValue[:idx], n.arrayValue[idx:]...)
+	return nil
+}

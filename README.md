@@ -62,4 +62,19 @@ func (n *Node) Value() any
 
 // MarshalJSON to []byte
 func (n *Node) MarshalJSON() ([]byte, error)
+
+// Merge two object or array nodes
+func (n *Node) Merge(node *Node) error
+
+// Len returns length of object or array nodes
+func (n *Node) Len() (int, error)
+
+// Compare current node with another node
+func (n *Node) Compare(op Operand, node *Node) bool
+
+// Remove by key from object
+func (n *Node) Remove(key string) error 
+
+// RemoveIndex from array
+func (n *Node) RemoveIndex(idx int) error
 ```

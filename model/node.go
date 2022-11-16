@@ -113,3 +113,33 @@ func (n *Node) MarshalJSON() ([]byte, error) {
 		return []byte("null"), nil
 	}
 }
+
+// Merge two object or array nodes
+func (n *Node) Merge(node *Node) error {
+	if n.Type != node.Type {
+		return fmt.Errorf("can't merge nodes of different types")
+	}
+	switch n.Type {
+	case ObjectNode:
+		for k, v := range node.objectValue {
+			n.objectValue[k] = v
+		}
+	case ArrayNode:
+		n.arrayValue = append(n.arrayValue, node.arrayValue...)
+	default:
+		return fmt.Errorf("merge not implemented for type %s", n.Type)
+	}
+	return nil
+}
+
+// Len returns length of object or array nodes
+func (n *Node) Len() (int, error) {
+	switch n.Type {
+	case ObjectNode:
+		return len(n.objectValue), nil
+	case ArrayNode:
+		return len(n.arrayValue), nil
+	default:
+		return 0, fmt.Errorf("merge not implemented for type %s", n.Type)
+	}
+}

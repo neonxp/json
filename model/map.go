@@ -41,3 +41,12 @@ func (n *Node) Map(cb func(key string, value *Node) (*Node, error)) error {
 	}
 	return nil
 }
+
+// Remove by key from object
+func (n *Node) Remove(key string) error {
+	if n.Type != ObjectNode {
+		return fmt.Errorf("node must be object, got %s", n.Type)
+	}
+	delete(n.objectValue, key)
+	return nil
+}
