@@ -9,6 +9,7 @@ import (
 // Node of JSON tree
 type Node struct {
 	Type         NodeType
+	Meta         Meta
 	stringValue  string
 	numberValue  float64
 	objectValue  NodeObjectValue
@@ -143,3 +144,6 @@ func (n *Node) Len() (int, error) {
 		return 0, fmt.Errorf("merge not implemented for type %s", n.Type)
 	}
 }
+
+// Meta represents node metadata
+type Meta map[string]any
