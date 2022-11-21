@@ -15,6 +15,7 @@ type lexem struct {
 	End   int     // End position at input string.
 }
 
+//go:generate stringer -type=lexType
 type lexType int
 
 const (

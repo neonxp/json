@@ -19,7 +19,7 @@ func (n *Node) Compare(op Operand, node *Node) bool {
 		if n.Type != ArrayNode {
 			return false
 		}
-		for _, v := range n.arrayValue {
+		for _, v := range n.ArrayValue {
 			if v.Value() == node.Value() {
 				return true
 			}
@@ -34,9 +34,9 @@ func less(n1 *Node, n2 *Node) bool {
 	}
 	switch n1.Type {
 	case NumberNode:
-		return n1.numberValue < n2.numberValue
+		return n1.NumberValue < n2.NumberValue
 	case StringNode:
-		return n1.stringValue < n2.stringValue
+		return n1.StringValue < n2.StringValue
 	default:
 		return false
 	}

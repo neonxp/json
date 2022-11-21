@@ -9,12 +9,12 @@ import (
 // Node of JSON tree
 type Node struct {
 	Type         NodeType
-	Meta         Meta
-	stringValue  string
-	numberValue  float64
-	objectValue  NodeObjectValue
-	arrayValue   NodeArrayValue
-	booleanValue bool
+	Meta         NodeObjectValue
+	StringValue  string
+	NumberValue  float64
+	ObjectValue  NodeObjectValue
+	ArrayValue   NodeArrayValue
+	BooleanValue bool
 }
 
 // NewNode creates new node from value
@@ -28,15 +28,15 @@ func NewNode(value any) *Node {
 func (n *Node) Value() any {
 	switch n.Type {
 	case StringNode:
-		return n.stringValue
+		return n.StringValue
 	case NumberNode:
-		return n.numberValue
+		return n.NumberValue
 	case ObjectNode:
-		return n.objectValue
+		return n.ObjectValue
 	case ArrayNode:
-		return n.arrayValue
+		return n.ArrayValue
 	case BooleanNode:
-		return n.booleanValue
+		return n.BooleanValue
 	default:
 		return nil
 	}
@@ -47,22 +47,27 @@ func (n *Node) SetValue(value any) {
 	switch value := value.(type) {
 	case string:
 		n.Type = StringNode
-		n.stringValue = value
+		n.StringValue = value
 	case float64:
 		n.Type = NumberNode
-		n.numberValue = value
+		n.NumberValue = value
 	case int:
 		n.Type = NumberNode
-		n.numberValue = float64(value)
+		n.NumberValue = float64(value)
 	case NodeObjectValue:
 		n.Type = ObjectNode
-		n.objectValue = value
+		meta, hasMeta := value["@"]
+		if hasMeta {
+			n.Meta = meta.ObjectValue
+			delete(value, "@")
+		}
+		n.ObjectValue = value
 	case NodeArrayValue:
 		n.Type = ArrayNode
-		n.arrayValue = value
+		n.ArrayValue = value
 	case bool:
 		n.Type = BooleanNode
-		n.booleanValue = value
+		n.BooleanValue = value
 	default:
 		n.Type = NullNode
 	}
@@ -72,12 +77,12 @@ func (n *Node) SetValue(value any) {
 func (n *Node) MarshalJSON() ([]byte, error) {
 	switch n.Type {
 	case StringNode:
-		return []byte(`"` + n.stringValue + `"`), nil
+		return []byte(`"` + n.StringValue + `"`), nil
 	case NumberNode:
-		return []byte(strconv.FormatFloat(n.numberValue, 'g', -1, 64)), nil
+		return []byte(strconv.FormatFloat(n.NumberValue, 'g', -1, 64)), nil
 	case ObjectNode:
-		result := make([][]byte, 0, len(n.objectValue))
-		for k, v := range n.objectValue {
+		result := make([][]byte, 0, len(n.ObjectValue))
+		for k, v := range n.ObjectValue {
 			b, err := v.MarshalJSON()
 			if err != nil {
 				return nil, err
@@ -91,8 +96,8 @@ func (n *Node) MarshalJSON() ([]byte, error) {
 				[]byte("}"),
 			}, []byte("")), nil
 	case ArrayNode:
-		result := make([][]byte, 0, len(n.arrayValue))
-		for _, v := range n.arrayValue {
+		result := make([][]byte, 0, len(n.ArrayValue))
+		for _, v := range n.ArrayValue {
 			b, err := v.MarshalJSON()
 			if err != nil {
 				return nil, err
@@ -106,7 +111,7 @@ func (n *Node) MarshalJSON() ([]byte, error) {
 				[]byte("]"),
 			}, []byte("")), nil
 	case BooleanNode:
-		if n.booleanValue {
+		if n.BooleanValue {
 			return []byte("true"), nil
 		}
 		return []byte("false"), nil
@@ -122,11 +127,11 @@ func (n *Node) Merge(node *Node) error {
 	}
 	switch n.Type {
 	case ObjectNode:
-		for k, v := range node.objectValue {
-			n.objectValue[k] = v
+		for k, v := range node.ObjectValue {
+			n.ObjectValue[k] = v
 		}
 	case ArrayNode:
-		n.arrayValue = append(n.arrayValue, node.arrayValue...)
+		n.ArrayValue = append(n.ArrayValue, node.ArrayValue...)
 	default:
 		return fmt.Errorf("merge not implemented for type %s", n.Type)
 	}
@@ -137,9 +142,9 @@ func (n *Node) Merge(node *Node) error {
 func (n *Node) Len() (int, error) {
 	switch n.Type {
 	case ObjectNode:
-		return len(n.objectValue), nil
+		return len(n.ObjectValue), nil
 	case ArrayNode:
-		return len(n.arrayValue), nil
+		return len(n.ArrayValue), nil
 	default:
 		return 0, fmt.Errorf("merge not implemented for type %s", n.Type)
 	}
