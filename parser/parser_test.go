@@ -14,7 +14,7 @@ func TestParse(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    *model.Node
+		want    model.Node
 		wantErr bool
 	}{
 		{

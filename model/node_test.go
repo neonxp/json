@@ -8,7 +8,7 @@ import (
 
 func TestNode_MarshalJSON(t *testing.T) {
 	type fields struct {
-		node *Node
+		node Node
 	}
 	tests := []struct {
 		name    string

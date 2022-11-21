@@ -8,7 +8,7 @@ import (
 	"go.neonxp.dev/json/model"
 )
 
-func Parse(json string) (*model.Node, error) {
+func Parse(json string) (model.Node, error) {
 	l := newLexer(json)
 	go l.Run(initJson)
 	n, err := parse(l.Output)
