@@ -30,6 +30,15 @@ func (n *ArrayNode) MarshalJSON() ([]byte, error) {
 		}, []byte("")), nil
 }
 
+func (n *ArrayNode) Set(v any) error {
+	val, ok := v.(NodeArrayValue)
+	if !ok {
+		return fmt.Errorf("%v is not array", v)
+	}
+	n.Value = val
+	return nil
+}
+
 func (n *ArrayNode) Index(idx int) (Node, error) {
 	if len(n.Value) <= idx {
 		return nil, fmt.Errorf("index %d out of range [0...%d]", idx, len(n.Value)-1)

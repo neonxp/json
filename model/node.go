@@ -4,6 +4,7 @@ package model
 type Node interface {
 	Type() NodeType
 	MarshalJSON() ([]byte, error)
+	Set(v any) error
 }
 
 // NewNode creates new node from value

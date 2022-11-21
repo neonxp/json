@@ -6,7 +6,7 @@ import (
 )
 
 type ObjectNode struct {
-	Value map[string]Node
+	Value NodeObjectValue
 }
 
 func (n ObjectNode) Type() NodeType {
@@ -30,10 +30,6 @@ func (n *ObjectNode) MarshalJSON() ([]byte, error) {
 		}, []byte("")), nil
 }
 
-func (n *ObjectNode) Set(k string, v any) {
-	n.Value[k] = NewNode(v)
-}
-
 func (n *ObjectNode) Get(k string) (Node, error) {
 	child, ok := n.Value[k]
 	if !ok {
@@ -50,4 +46,13 @@ func (n *ObjectNode) Merge(n2 *ObjectNode) {
 
 func (n *ObjectNode) Len() int {
 	return len(n.Value)
+}
+
+func (n *ObjectNode) Set(v any) error {
+	val, ok := v.(NodeObjectValue)
+	if !ok {
+		return fmt.Errorf("%v is not object", v)
+	}
+	n.Value = val
+	return nil
 }

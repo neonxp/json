@@ -9,3 +9,7 @@ func (n NullNode) Type() NodeType {
 func (n NullNode) MarshalJSON() ([]byte, error) {
 	return []byte("null"), nil
 }
+
+func (n NullNode) Set(v any) error {
+	return nil
+}
