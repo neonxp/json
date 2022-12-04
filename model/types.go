@@ -13,6 +13,7 @@ const (
 
 type NodeObjectValue map[string]Node
 
-func (n NodeObjectValue) Set(k string, v any) {
+func (n NodeObjectValue) Set(k string, v any) error {
 	n[k] = NewNode(v)
+	return nil
 }

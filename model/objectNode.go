@@ -7,6 +7,7 @@ import (
 
 type ObjectNode struct {
 	Value NodeObjectValue
+	Meta  map[string]any
 }
 
 func (n ObjectNode) Type() NodeType {
@@ -55,4 +56,8 @@ func (n *ObjectNode) Set(v any) error {
 	}
 	n.Value = val
 	return nil
+}
+
+func (n *ObjectNode) Remove(key string) {
+	delete(n.Value, key)
 }
