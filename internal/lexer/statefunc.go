@@ -1,6 +1,6 @@
-package parser
+package lexer
 
-type stateFunc func(*lexer) stateFunc
+type stateFunc func(*Lexer) stateFunc
 
 type stateStack []stateFunc
 

@@ -1,24 +1,24 @@
-package parser
+package lexer
 
-func initJson(l *lexer) stateFunc {
+func InitJson(l *Lexer) stateFunc {
 	ignoreWhiteSpace(l)
 	switch {
 	case l.Accept("{"):
-		l.Emit(lObjectStart)
+		l.Emit(LObjectStart)
 		return stateInObject
 	case l.Accept("["):
-		l.Emit(lArrayStart)
+		l.Emit(LArrayStart)
 	case l.Peek() == eof:
 		return nil
 	}
 	return l.Errorf("Unknown token: %s", string(l.Peek()))
 }
 
-func stateInObject(l *lexer) stateFunc {
+func stateInObject(l *Lexer) stateFunc {
 	// we in object, so we expect field keys and values
 	ignoreWhiteSpace(l)
 	if l.Accept("}") {
-		l.Emit(lObjectEnd)
+		l.Emit(LObjectEnd)
 		// If meet close object return to previous state (including initial)
 		return l.PopState()
 	}
@@ -28,83 +28,83 @@ func stateInObject(l *lexer) stateFunc {
 	if !scanQuotedString(l, '"') {
 		return l.Errorf("Unknown token: %s", string(l.Peek()))
 	}
-	l.Emit(lObjectKey)
+	l.Emit(LObjectKey)
 	ignoreWhiteSpace(l)
 	if !l.Accept(":") {
 		return l.Errorf("Expected ':'")
 	}
 	ignoreWhiteSpace(l)
-	l.Emit(lObjectValue)
+	l.Emit(LObjectValue)
 	switch {
 	case scanQuotedString(l, '"'):
-		l.Emit(lString)
+		l.Emit(LString)
 		ignoreWhiteSpace(l)
 		l.Accept(",")
 		l.Ignore()
 		ignoreWhiteSpace(l)
 		return stateInObject
 	case scanNumber(l):
-		l.Emit(lNumber)
+		l.Emit(LNumber)
 		ignoreWhiteSpace(l)
 		l.Accept(",")
 		l.Ignore()
 		ignoreWhiteSpace(l)
 		return stateInObject
 	case l.AcceptAnyOf([]string{"true", "false"}, true):
-		l.Emit(lBoolean)
+		l.Emit(LBoolean)
 		ignoreWhiteSpace(l)
 		l.Accept(",")
 		l.Ignore()
 		ignoreWhiteSpace(l)
 		return stateInObject
 	case l.AcceptString("null", true):
-		l.Emit(lNull)
+		l.Emit(LNull)
 		ignoreWhiteSpace(l)
 		l.Accept(",")
 		l.Ignore()
 		ignoreWhiteSpace(l)
 		return stateInObject
 	case l.Accept("{"):
-		l.Emit(lObjectStart)
+		l.Emit(LObjectStart)
 		l.PushState(stateInObject)
 		return stateInObject
 	case l.Accept("["):
-		l.Emit(lArrayStart)
+		l.Emit(LArrayStart)
 		l.PushState(stateInObject)
 		return stateInArray
 	}
 	return l.Errorf("Unknown token: %s", string(l.Peek()))
 }
 
-func stateInArray(l *lexer) stateFunc {
+func stateInArray(l *Lexer) stateFunc {
 	ignoreWhiteSpace(l)
 	l.Accept(",")
 	ignoreWhiteSpace(l)
 	switch {
 	case scanQuotedString(l, '"'):
-		l.Emit(lString)
+		l.Emit(LString)
 	case scanNumber(l):
-		l.Emit(lNumber)
+		l.Emit(LNumber)
 	case l.AcceptAnyOf([]string{"true", "false"}, true):
-		l.Emit(lBoolean)
+		l.Emit(LBoolean)
 	case l.AcceptString("null", true):
-		l.Emit(lNull)
+		l.Emit(LNull)
 	case l.Accept("{"):
-		l.Emit(lObjectStart)
+		l.Emit(LObjectStart)
 		l.PushState(stateInArray)
 		return stateInObject
 	case l.Accept("["):
-		l.Emit(lArrayStart)
+		l.Emit(LArrayStart)
 		l.PushState(stateInArray)
 		return stateInArray
 	case l.Accept("]"):
-		l.Emit(lArrayEnd)
+		l.Emit(LArrayEnd)
 		return l.PopState()
 	}
 	return stateInArray
 }
 
-func ignoreWhiteSpace(l *lexer) {
+func ignoreWhiteSpace(l *Lexer) {
 	l.AcceptWhile(" \n\t") // ignore whitespaces
 	l.Ignore()
 }

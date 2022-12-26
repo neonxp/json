@@ -1,4 +1,4 @@
-package parser
+package lexer
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 
 const eof rune = -1
 
-type lexem struct {
+type Lexem struct {
 	Type  lexType // Type of Lexem.
 	Value string  // Value of Lexem.
 	Start int     // Start position at input string.
@@ -19,43 +19,43 @@ type lexem struct {
 type lexType int
 
 const (
-	lEOF lexType = iota
-	lError
-	lObjectStart
-	lObjectEnd
-	lObjectKey
-	lObjectValue
-	lArrayStart
-	lArrayEnd
-	lString
-	lNumber
-	lBoolean
-	lNull
+	LEOF lexType = iota
+	LError
+	LObjectStart
+	LObjectEnd
+	LObjectKey
+	LObjectValue
+	LArrayStart
+	LArrayEnd
+	LString
+	LNumber
+	LBoolean
+	LNull
 )
 
-// lexer holds current scanner state.
-type lexer struct {
+// Lexer holds current scanner state.
+type Lexer struct {
 	Input  string     // Input string.
 	Start  int        // Start position of current lexem.
 	Pos    int        // Pos at input string.
-	Output chan lexem // Lexems channel.
+	Output chan Lexem // Lexems channel.
 	width  int        // Width of last rune.
 	states stateStack // Stack of states to realize PrevState.
 }
 
 // newLexer returns new scanner for input string.
-func newLexer(input string) *lexer {
-	return &lexer{
+func NewLexer(input string) *Lexer {
+	return &Lexer{
 		Input:  input,
 		Start:  0,
 		Pos:    0,
-		Output: make(chan lexem, 2),
+		Output: make(chan Lexem, 2),
 		width:  0,
 	}
 }
 
 // Run lexing.
-func (l *lexer) Run(init stateFunc) {
+func (l *Lexer) Run(init stateFunc) {
 	for state := init; state != nil; {
 		state = state(l)
 	}
@@ -63,18 +63,18 @@ func (l *lexer) Run(init stateFunc) {
 }
 
 // PopState returns previous state function.
-func (l *lexer) PopState() stateFunc {
+func (l *Lexer) PopState() stateFunc {
 	return l.states.Pop()
 }
 
 // PushState pushes state before going deeper states.
-func (l *lexer) PushState(s stateFunc) {
+func (l *Lexer) PushState(s stateFunc) {
 	l.states.Push(s)
 }
 
 // Emit current lexem to output.
-func (l *lexer) Emit(typ lexType) {
-	l.Output <- lexem{
+func (l *Lexer) Emit(typ lexType) {
+	l.Output <- Lexem{
 		Type:  typ,
 		Value: l.Input[l.Start:l.Pos],
 		Start: l.Start,
@@ -84,9 +84,9 @@ func (l *lexer) Emit(typ lexType) {
 }
 
 // Errorf produces error lexem and stops scanning.
-func (l *lexer) Errorf(format string, args ...interface{}) stateFunc {
-	l.Output <- lexem{
-		Type:  lError,
+func (l *Lexer) Errorf(format string, args ...interface{}) stateFunc {
+	l.Output <- Lexem{
+		Type:  LError,
 		Value: fmt.Sprintf(format, args...),
 		Start: l.Start,
 		End:   l.Pos,
@@ -95,7 +95,7 @@ func (l *lexer) Errorf(format string, args ...interface{}) stateFunc {
 }
 
 // Next rune from input.
-func (l *lexer) Next() (r rune) {
+func (l *Lexer) Next() (r rune) {
 	if int(l.Pos) >= len(l.Input) {
 		l.width = 0
 		return eof
@@ -106,25 +106,25 @@ func (l *lexer) Next() (r rune) {
 }
 
 // Back move position to previos rune.
-func (l *lexer) Back() {
+func (l *Lexer) Back() {
 	l.Pos -= l.width
 }
 
 // Ignore previosly buffered text.
-func (l *lexer) Ignore() {
+func (l *Lexer) Ignore() {
 	l.Start = l.Pos
 	l.width = 0
 }
 
 // Peek rune at current position without moving position.
-func (l *lexer) Peek() (r rune) {
+func (l *Lexer) Peek() (r rune) {
 	r = l.Next()
 	l.Back()
 	return r
 }
 
 // Accept any rune from valid string. Returns true if Next rune was in valid string.
-func (l *lexer) Accept(valid string) bool {
+func (l *Lexer) Accept(valid string) bool {
 	if strings.ContainsRune(valid, l.Next()) {
 		return true
 	}
@@ -133,7 +133,7 @@ func (l *lexer) Accept(valid string) bool {
 }
 
 // AcceptString returns true if given string was at position.
-func (l *lexer) AcceptString(s string, caseInsentive bool) bool {
+func (l *Lexer) AcceptString(s string, caseInsentive bool) bool {
 	input := l.Input[l.Start:]
 	if caseInsentive {
 		input = strings.ToLower(input)
@@ -148,7 +148,7 @@ func (l *lexer) AcceptString(s string, caseInsentive bool) bool {
 }
 
 // AcceptAnyOf substrings. Retuns true if any of substrings was found.
-func (l *lexer) AcceptAnyOf(s []string, caseInsentive bool) bool {
+func (l *Lexer) AcceptAnyOf(s []string, caseInsentive bool) bool {
 	for _, substring := range s {
 		if l.AcceptString(substring, caseInsentive) {
 			return true
@@ -158,7 +158,7 @@ func (l *lexer) AcceptAnyOf(s []string, caseInsentive bool) bool {
 }
 
 // AcceptWhile passing symbols from input while they at `valid` string.
-func (l *lexer) AcceptWhile(valid string) bool {
+func (l *Lexer) AcceptWhile(valid string) bool {
 	isValid := false
 	for l.Accept(valid) {
 		isValid = true
@@ -167,7 +167,7 @@ func (l *lexer) AcceptWhile(valid string) bool {
 }
 
 // AcceptWhileNot passing symbols from input while they NOT in `invalid` string.
-func (l *lexer) AcceptWhileNot(invalid string) bool {
+func (l *Lexer) AcceptWhileNot(invalid string) bool {
 	isValid := false
 	for !strings.ContainsRune(invalid, l.Next()) {
 		isValid = true
@@ -177,6 +177,6 @@ func (l *lexer) AcceptWhileNot(invalid string) bool {
 }
 
 // AtStart returns true if current lexem not empty
-func (l *lexer) AtStart() bool {
+func (l *Lexer) AtStart() bool {
 	return l.Pos == l.Start
 }

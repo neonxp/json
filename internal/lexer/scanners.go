@@ -1,6 +1,6 @@
-package parser
+package lexer
 
-func scanNumber(l *lexer) bool {
+func scanNumber(l *Lexer) bool {
 	l.AcceptWhile("0123456789")
 	if l.AtStart() {
 		// not found any digit
@@ -11,7 +11,7 @@ func scanNumber(l *lexer) bool {
 	return !l.AtStart()
 }
 
-func scanQuotedString(l *lexer, quote rune) bool {
+func scanQuotedString(l *Lexer, quote rune) bool {
 	start := l.Pos
 	if l.Next() != quote {
 		l.Back()
