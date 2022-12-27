@@ -114,7 +114,7 @@ type NullNode interface {
 
 // Если узел имплементирует этот интерфейс то вызывается метод Parent передающий родительский узел
 type AcceptParent interface {
-	Parent(n Node)
+	SetParent(n Node)
 }
 ```
 

@@ -42,5 +42,5 @@ type NullNode interface {
 }
 
 type AcceptParent interface {
-	Parent(n Node)
+	SetParent(n Node)
 }

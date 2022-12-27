@@ -21,7 +21,7 @@ func (j *JSON) createChild(parent Node, l lexer.Lexem, ch chan lexer.Lexem) (Nod
 			return nil, err
 		}
 		if c, ok := c.(AcceptParent); ok {
-			c.Parent(parent)
+			c.SetParent(parent)
 		}
 		child := c.(StringNode)
 		child.SetString(strings.Trim(l.Value, `"`))
@@ -36,7 +36,7 @@ func (j *JSON) createChild(parent Node, l lexer.Lexem, ch chan lexer.Lexem) (Nod
 			return nil, err
 		}
 		if c, ok := c.(AcceptParent); ok {
-			c.Parent(parent)
+			c.SetParent(parent)
 		}
 		child := c.(NumberNode)
 		child.SetNumber(num)
@@ -48,7 +48,7 @@ func (j *JSON) createChild(parent Node, l lexer.Lexem, ch chan lexer.Lexem) (Nod
 			return nil, err
 		}
 		if c, ok := c.(AcceptParent); ok {
-			c.Parent(parent)
+			c.SetParent(parent)
 		}
 		child := c.(BooleanNode)
 		child.SetBool(b)
@@ -71,7 +71,7 @@ func (j *JSON) createChild(parent Node, l lexer.Lexem, ch chan lexer.Lexem) (Nod
 			return nil, err
 		}
 		if c, ok := c.(AcceptParent); ok {
-			c.Parent(parent)
+			c.SetParent(parent)
 		}
 		return c.(NullNode), nil
 	default:
@@ -85,7 +85,7 @@ func (j *JSON) parseObject(parent Node, ch chan lexer.Lexem) (ObjectNode, error)
 		return nil, err
 	}
 	if c, ok := c.(AcceptParent); ok {
-		c.Parent(parent)
+		c.SetParent(parent)
 	}
 	n := c.(ObjectNode)
 	nextKey := ""
@@ -114,7 +114,7 @@ func (j *JSON) parseArray(parent Node, ch chan lexer.Lexem) (ArrayNode, error) {
 		return nil, err
 	}
 	if c, ok := c.(AcceptParent); ok {
-		c.Parent(parent)
+		c.SetParent(parent)
 	}
 	n := c.(ArrayNode)
 	for l := range ch {
