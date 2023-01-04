@@ -13,7 +13,7 @@ func Query(parent Node, path []string) (Node, error) {
 	head, rest := path[0], path[1:]
 	switch parent := parent.(type) {
 	case ObjectNode:
-		next, ok := parent.GetByKey(head)
+		next, ok := parent.Get(head)
 		if !ok {
 			return nil, fmt.Errorf("key %s not found at object %v", head, parent)
 		}

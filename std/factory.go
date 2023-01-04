@@ -8,7 +8,9 @@ import (
 	"go.neonxp.dev/json"
 )
 
-func Factory(typ json.NodeType) (json.Node, error) {
+type Factory struct{}
+
+func (f *Factory) Produce(typ json.NodeType) (json.Node, error) {
 	switch typ {
 	case json.ObjectType:
 		return ObjectNode{}, nil
@@ -26,21 +28,40 @@ func Factory(typ json.NodeType) (json.Node, error) {
 	return nil, fmt.Errorf("unknown type: %s", typ)
 }
 
+func (f *Factory) Fill(n json.Node, value any) {
+	switch n := n.(type) {
+	case *ObjectNode:
+		for k, v := range value.(map[string]json.Node) {
+			n.Set(k, v)
+		}
+	case *ArrayNode:
+		for _, v := range value.([]json.Node) {
+			n.Append(v)
+		}
+	case *StringNode:
+		n.Value = value.(string)
+	case *NumberNode:
+		n.Value = value.(float64)
+	case *BooleanNode:
+		n.Value = value.(bool)
+	}
+}
+
 type ObjectNode map[string]json.Node
 
-func (o ObjectNode) SetKeyValue(k string, v json.Node) {
+func (o ObjectNode) Set(k string, v json.Node) {
 	o[k] = v
 }
 
-func (o ObjectNode) GetByKey(k string) (json.Node, bool) {
+func (o ObjectNode) Get(k string) (json.Node, bool) {
 	v, ok := o[k]
 	return v, ok
 }
 
-func (o ObjectNode) String() string {
+func (o ObjectNode) ToJSON() string {
 	res := make([]string, 0, len(o))
 	for k, n := range o {
-		res = append(res, fmt.Sprintf(`"%s":%s`, k, n.String()))
+		res = append(res, fmt.Sprintf(`"%s":%s`, k, n.ToJSON()))
 	}
 	return fmt.Sprintf(`{%s}`, strings.Join(res, ","))
 }
@@ -60,10 +81,10 @@ func (o *ArrayNode) Len() int {
 	return len(*o)
 }
 
-func (o *ArrayNode) String() string {
+func (o *ArrayNode) ToJSON() string {
 	res := make([]string, 0, len(*o))
 	for _, v := range *o {
-		res = append(res, v.String())
+		res = append(res, v.ToJSON())
 	}
 	return fmt.Sprintf(`[%s]`, strings.Join(res, ","))
 }
@@ -72,15 +93,7 @@ type StringNode struct {
 	Value string
 }
 
-func (o *StringNode) SetString(v string) {
-	o.Value = v
-}
-
-func (o *StringNode) GetString() string {
-	return o.Value
-}
-
-func (o *StringNode) String() string {
+func (o *StringNode) ToJSON() string {
 	return `"` + o.Value + `"`
 }
 
@@ -88,15 +101,7 @@ type NumberNode struct {
 	Value float64
 }
 
-func (o *NumberNode) SetNumber(v float64) {
-	o.Value = v
-}
-
-func (o *NumberNode) GetNumber() float64 {
-	return o.Value
-}
-
-func (o *NumberNode) String() string {
+func (o *NumberNode) ToJSON() string {
 	return strconv.FormatFloat(float64(o.Value), 'g', 15, 64)
 }
 
@@ -104,15 +109,7 @@ type BooleanNode struct {
 	Value bool
 }
 
-func (o *BooleanNode) SetBool(v bool) {
-	o.Value = v
-}
-
-func (o *BooleanNode) GetBool() bool {
-	return o.Value
-}
-
-func (o BooleanNode) String() string {
+func (o BooleanNode) ToJSON() string {
 	if o.Value {
 		return "true"
 	}
@@ -121,6 +118,6 @@ func (o BooleanNode) String() string {
 
 type NullNode struct{}
 
-func (o NullNode) String() string {
+func (o NullNode) ToJSON() string {
 	return "null"
 }

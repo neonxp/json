@@ -1,15 +1,18 @@
 package json
 
-type NodeFactory func(typ NodeType) (Node, error)
+type Factory interface {
+	Produce(typ NodeType) (Node, error)
+	Fill(n Node, value any)
+}
 
 type Node interface {
-	String() string
+	ToJSON() string
 }
 
 type ObjectNode interface {
 	Node
-	SetKeyValue(k string, v Node)
-	GetByKey(k string) (Node, bool)
+	Set(k string, v Node)
+	Get(k string) (Node, bool)
 }
 
 type ArrayNode interface {
@@ -21,20 +24,14 @@ type ArrayNode interface {
 
 type StringNode interface {
 	Node
-	SetString(v string)
-	GetString() string
 }
 
 type NumberNode interface {
 	Node
-	SetNumber(v float64)
-	GetNumber() float64
 }
 
 type BooleanNode interface {
 	Node
-	SetBool(v bool)
-	GetBool() bool
 }
 
 type NullNode interface {

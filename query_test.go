@@ -41,7 +41,7 @@ func TestMustQuery(t *testing.T) {
 		{
 			name: "find in object",
 			args: args{
-				parent: json.New(std.Factory).MustUnmarshal(jsonString),
+				parent: json.New(&std.Factory{}).MustUnmarshal(jsonString),
 				path:   []string{"object", "object 2", "three"},
 			},
 			want: &std.StringNode{Value: "four"},
@@ -49,7 +49,7 @@ func TestMustQuery(t *testing.T) {
 		{
 			name: "find in array",
 			args: args{
-				parent: json.New(std.Factory).MustUnmarshal(jsonString),
+				parent: json.New(&std.Factory{}).MustUnmarshal(jsonString),
 				path:   []string{"array", "[4]", "five"},
 			},
 			want: &std.StringNode{Value: "six"},

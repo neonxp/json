@@ -63,21 +63,24 @@ std.ObjectNode{
 ## Своя фабрика
 
 ```
-// Непосредственно фабрика возвращающая заготовки нужного типа
-type NodeFactory func(typ NodeType) (Node, error)
+type Factory interface {
+    // Непосредственно фабрика возвращающая заготовки нужного типа
+	Produce(typ NodeType) (Node, error)
+    // Заполнение заготовки определенного типа соответствующим ей значением
+	Fill(n Node, value any)
+}
 
 type Node interface {
-	String() string
+    // Возвращает json представление узла
+	ToJSON() string
 }
 
-// Имплементация узла объекта
 type ObjectNode interface {
 	Node
-	SetKetValue(k string, v Node)
-	GetByKey(k string) (Node, bool)
+	Set(k string, v Node)
+	Get(k string) (Node, bool)
 }
 
-// Имлементация узла массива
 type ArrayNode interface {
 	Node
 	Append(v Node)
@@ -85,29 +88,18 @@ type ArrayNode interface {
 	Len() int
 }
 
-// Имплементация узла строки
 type StringNode interface {
 	Node
-	SetString(v string)
-	GetString() string
 }
 
-
-// Имплементация узла числа
 type NumberNode interface {
 	Node
-	SetNumber(v float64)
-	GetNumber() float64
 }
 
-// Имплементация узла булевого типа
 type BooleanNode interface {
 	Node
-	SetBool(v bool)
-	GetBool() bool
 }
 
-// Имплементация null
 type NullNode interface {
 	Node
 }
@@ -118,3 +110,4 @@ type AcceptParent interface {
 }
 ```
 
+[Пример реализации самой простой фабрики и типов](/std/factory.go)

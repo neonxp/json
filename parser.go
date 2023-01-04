@@ -16,7 +16,7 @@ func (j *JSON) parse(ch chan lexer.Lexem) (Node, error) {
 func (j *JSON) createChild(parent Node, l lexer.Lexem, ch chan lexer.Lexem) (Node, error) {
 	switch l.Type {
 	case lexer.LString:
-		c, err := j.Factory(StringType)
+		c, err := j.Factory.Produce(StringType)
 		if err != nil {
 			return nil, err
 		}
@@ -24,14 +24,14 @@ func (j *JSON) createChild(parent Node, l lexer.Lexem, ch chan lexer.Lexem) (Nod
 			c.SetParent(parent)
 		}
 		child := c.(StringNode)
-		child.SetString(strings.Trim(l.Value, `"`))
+		j.Factory.Fill(child, strings.Trim(l.Value, `"`))
 		return child, nil
 	case lexer.LNumber:
 		num, err := strconv.ParseFloat(l.Value, 64)
 		if err != nil {
 			return nil, err
 		}
-		c, err := j.Factory(NumberType)
+		c, err := j.Factory.Produce(NumberType)
 		if err != nil {
 			return nil, err
 		}
@@ -39,11 +39,11 @@ func (j *JSON) createChild(parent Node, l lexer.Lexem, ch chan lexer.Lexem) (Nod
 			c.SetParent(parent)
 		}
 		child := c.(NumberNode)
-		child.SetNumber(num)
+		j.Factory.Fill(child, num)
 		return child, nil
 	case lexer.LBoolean:
 		b := strings.ToLower(l.Value) == "true"
-		c, err := j.Factory(BooleanType)
+		c, err := j.Factory.Produce(BooleanType)
 		if err != nil {
 			return nil, err
 		}
@@ -51,7 +51,7 @@ func (j *JSON) createChild(parent Node, l lexer.Lexem, ch chan lexer.Lexem) (Nod
 			c.SetParent(parent)
 		}
 		child := c.(BooleanNode)
-		child.SetBool(b)
+		j.Factory.Fill(child, b)
 		return child, nil
 	case lexer.LObjectStart:
 		child, err := j.parseObject(parent, ch)
@@ -66,7 +66,7 @@ func (j *JSON) createChild(parent Node, l lexer.Lexem, ch chan lexer.Lexem) (Nod
 		}
 		return child, nil
 	case lexer.LNull:
-		c, err := j.Factory(NullType)
+		c, err := j.Factory.Produce(NullType)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func (j *JSON) createChild(parent Node, l lexer.Lexem, ch chan lexer.Lexem) (Nod
 }
 
 func (j *JSON) parseObject(parent Node, ch chan lexer.Lexem) (ObjectNode, error) {
-	c, err := j.Factory(ObjectType)
+	c, err := j.Factory.Produce(ObjectType)
 	if err != nil {
 		return nil, err
 	}
@@ -102,14 +102,14 @@ func (j *JSON) parseObject(parent Node, ch chan lexer.Lexem) (ObjectNode, error)
 			if err != nil {
 				return nil, err
 			}
-			n.SetKeyValue(nextKey, child)
+			n.Set(nextKey, child)
 		}
 	}
 	return nil, fmt.Errorf("unexpected end of object")
 }
 
 func (j *JSON) parseArray(parent Node, ch chan lexer.Lexem) (ArrayNode, error) {
-	c, err := j.Factory(ArrayType)
+	c, err := j.Factory.Produce(ArrayType)
 	if err != nil {
 		return nil, err
 	}

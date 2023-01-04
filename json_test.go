@@ -10,7 +10,7 @@ import (
 
 func TestJSON_Unmarshal(t *testing.T) {
 	j := &json.JSON{
-		Factory: std.Factory,
+		Factory: &std.Factory{},
 	}
 	type args struct {
 		input string
@@ -95,7 +95,7 @@ func TestJSON_Unmarshal(t *testing.T) {
 
 func TestJSON_Marshal(t *testing.T) {
 	j := &json.JSON{
-		Factory: std.Factory,
+		Factory: &std.Factory{},
 	}
 	type args struct {
 		n json.Node
